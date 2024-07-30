@@ -8,7 +8,8 @@ import java.util.ArrayList;
 
 public class MainActivityViewModel extends ViewModel {
 
-    ArrayList<SampleDataDetails> sampleDataDetails;
+    ArrayList<SampleDataDetails>  sampleDataDetailsArrayLists=new ArrayList<>();
+    int index = 0;
 
     /**
      * retrieve sample data
@@ -16,12 +17,13 @@ public class MainActivityViewModel extends ViewModel {
      */
     public ArrayList<SampleDataDetails> retrieveInitialData()
     {
-        sampleDataDetails=new ArrayList<>();
-        sampleDataDetails.add(new SampleDataDetails("title 1","https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
-        sampleDataDetails.add(new SampleDataDetails("title 2","https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
-        sampleDataDetails.add(new SampleDataDetails("title 3","https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
-        sampleDataDetails.add(new SampleDataDetails("title 4","https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
-        return sampleDataDetails;
+       if (index!=0)
+           return sampleDataDetailsArrayLists;
+        sampleDataDetailsArrayLists.add(new SampleDataDetails("title 1","https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+        sampleDataDetailsArrayLists.add(new SampleDataDetails("title 2","https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+        sampleDataDetailsArrayLists.add(new SampleDataDetails("title 3","https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+        sampleDataDetailsArrayLists.add(new SampleDataDetails("title 4","https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+        return sampleDataDetailsArrayLists;
     }
 
     /**
@@ -33,13 +35,29 @@ public class MainActivityViewModel extends ViewModel {
     {
         int index=count;
         ++index;
-        sampleDataDetails.add(new SampleDataDetails("title "+index,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+        sampleDataDetailsArrayLists.add(new SampleDataDetails("title "+index,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
         ++index;
-        sampleDataDetails.add(new SampleDataDetails("title "+index,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+        sampleDataDetailsArrayLists.add(new SampleDataDetails("title "+index,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
         ++index;
-        sampleDataDetails.add(new SampleDataDetails("title "+index,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+        sampleDataDetailsArrayLists.add(new SampleDataDetails("title "+index,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
         ++index;
-        sampleDataDetails.add(new SampleDataDetails("title "+index,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
-        return sampleDataDetails;
+        sampleDataDetailsArrayLists.add(new SampleDataDetails("title "+index,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+        return sampleDataDetailsArrayLists;
+    }
+
+    public ArrayList<SampleDataDetails> editExistingDataItem(SampleDataDetails sampleDataDetails, String titleValue, String imageUrl) {
+        int index = sampleDataDetailsArrayLists.indexOf(sampleDataDetails);
+
+        sampleDataDetails.title = titleValue;
+        sampleDataDetails.imageUrl = imageUrl;
+        sampleDataDetailsArrayLists.remove(index);
+        sampleDataDetailsArrayLists.add(index, sampleDataDetails);
+        return sampleDataDetailsArrayLists;
+
+    }
+
+    public ArrayList<SampleDataDetails> addDataToExisting(String titleValue, String titleUrl) {
+        sampleDataDetailsArrayLists.add(0, new SampleDataDetails(titleValue, titleUrl));
+        return sampleDataDetailsArrayLists;
     }
 }

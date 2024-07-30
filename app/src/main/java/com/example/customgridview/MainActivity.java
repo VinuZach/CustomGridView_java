@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -32,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
     RecyclerView dataItemRecyclerView;
     private static final String TAG = "MainActivity123";
-    int index = 0;
+
     CustomAdapter<SampleDataDetails> customAdapter;
     FloatingActionButton addItemFAB;
     MainActivityViewModel mainActivityViewModel;
@@ -42,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
+        Log.e(TAG, "onCreate: " + mainActivityViewModel.index);
         ArrayList<SampleDataDetails> sampleDataDetails = mainActivityViewModel.retrieveInitialData();
         addItemFAB.setOnClickListener(view -> displayItemDetails(null));
         customAdapter = new CustomAdapter<SampleDataDetails>(this, sampleDataDetails) {
@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDataBind(SampleDataDetails dataItem, int position, ItemViewHolder itemViewHolder) {
                 ImageView imageView = itemViewHolder.itemView.findViewById(R.id.imageView);
                 TextView titleTextView = itemViewHolder.itemView.findViewById(R.id.textView);
-                displayImageWithGLide(imageView,dataItem.imageUrl);
+                displayImageWithGLide(imageView, dataItem.imageUrl);
                 titleTextView.setText(dataItem.title);
 
 
@@ -84,10 +84,11 @@ public class MainActivity extends AppCompatActivity {
                 try {
                     GridLayoutManager gridLayoutManager = (GridLayoutManager) recyclerView.getLayoutManager();
                     if ((gridLayoutManager != null && gridLayoutManager.findLastCompletelyVisibleItemPosition() == sampleDataDetails.size() - 1)) {
-                        if (index > 10)
+                        if (mainActivityViewModel.index > 10)
                             return;
-                        index = index + 4;
-                        ArrayList<SampleDataDetails> sampleDataDetails = mainActivityViewModel.retrieveMoreData(index);
+
+                        mainActivityViewModel.index = mainActivityViewModel.index + 4;
+                        ArrayList<SampleDataDetails> sampleDataDetails = mainActivityViewModel.retrieveMoreData(mainActivityViewModel.index);
                         recyclerView.getRecycledViewPool().clear();
                         customAdapter.setItemList(sampleDataDetails);
                         customAdapter.notifyItemChanged(sampleDataDetails.size() - 1);
@@ -129,7 +130,7 @@ public class MainActivity extends AppCompatActivity {
             deleteImageView.setVisibility(View.VISIBLE);
             titleEditText.setText(sampleDataDetails.title);
             imageDataImageView.setVisibility(View.VISIBLE);
-            displayImageWithGLide(imageDataImageView,sampleDataDetails.imageUrl);
+            displayImageWithGLide(imageDataImageView, sampleDataDetails.imageUrl);
             imageUrlEditText.setText(sampleDataDetails.imageUrl);
         }
         deleteImageView.setOnClickListener(view -> {
@@ -149,29 +150,25 @@ public class MainActivity extends AppCompatActivity {
                 return;
             }
 
-                List<SampleDataDetails> sampleDataDetailsList = customAdapter.getItemList();
-                if (sampleDataDetails != null) {
+            List<SampleDataDetails> sampleDataDetailsList;
+            if (sampleDataDetails != null) {
+                sampleDataDetailsList = mainActivityViewModel.editExistingDataItem(sampleDataDetails, titleValue, imageUrlEditText.getText().toString());
 
-                    int index = sampleDataDetailsList.indexOf(sampleDataDetails);
 
-                    sampleDataDetails.title = titleValue;
-                    sampleDataDetails.imageUrl = imageUrlEditText.getText().toString();
-                    sampleDataDetailsList.remove(index);
-                    sampleDataDetailsList.add(index, sampleDataDetails);
+            } else {
+                sampleDataDetailsList = mainActivityViewModel.addDataToExisting(titleValue, imageUrlEditText.getText().toString());
 
-                } else {
-                    sampleDataDetailsList.add(0, new SampleDataDetails(titleValue, imageUrlEditText.getText().toString()));
-                }
-                dataItemRecyclerView.getRecycledViewPool().clear();
-                customAdapter.setItemList(sampleDataDetailsList);
-                customAdapter.notifyDataSetChanged();
-                bottomSheet.cancel();
+            }
+            dataItemRecyclerView.getRecycledViewPool().clear();
+            customAdapter.setItemList(sampleDataDetailsList);
+            customAdapter.notifyDataSetChanged();
+            bottomSheet.cancel();
 
         });
         bottomSheet.show();
     }
-void displayImageWithGLide(ImageView imageView,String imageUrl)
-{
-    Glide.with(MainActivity.this).load(imageUrl).placeholder(R.drawable.no_photo).into(imageView);
-}
+
+    void displayImageWithGLide(ImageView imageView, String imageUrl) {
+        Glide.with(MainActivity.this).load(imageUrl).placeholder(R.drawable.no_photo).into(imageView);
+    }
 }
