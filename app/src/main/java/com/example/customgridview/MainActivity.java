@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -30,7 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
 
     RecyclerView dataItemRecyclerView;
-    private static final String TAG = "MainActivit12y";
+    private static final String TAG = "MainActivity123";
     int index = 0;
     CustomAdapter<SampleDataDetails> customAdapter;
     FloatingActionButton addItemFAB;
@@ -54,14 +55,14 @@ public class MainActivity extends AppCompatActivity {
             public void onDataBind(SampleDataDetails dataItem, int position, ItemViewHolder itemViewHolder) {
                 ImageView imageView = itemViewHolder.itemView.findViewById(R.id.imageView);
                 TextView titleTextView = itemViewHolder.itemView.findViewById(R.id.textView);
-                Glide.with(MainActivity.this).load(dataItem.imageUrl).into(imageView);
+                displayImageWithGLide(imageView,dataItem.imageUrl);
                 titleTextView.setText(dataItem.title);
             }
 
             @Override
             public void onItemClick(SampleDataDetails dataItem) {
                 super.onItemClick(dataItem);
-                Log.e(TAG, "onItemClick: asdasd");
+
                 displayItemDetails(dataItem);
 
             }
@@ -114,19 +115,20 @@ public class MainActivity extends AppCompatActivity {
         BottomSheetDialog bottomSheet =
                 new BottomSheetDialog(this);
         bottomSheet.setContentView(R.layout.dialog_item_view);
-        bottomSheet.findViewById(R.id.close).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                bottomSheet.cancel();
-            }
-        });
+        bottomSheet.findViewById(R.id.close).setOnClickListener(view -> bottomSheet.cancel());
 
         ImageView deleteImageView = bottomSheet.findViewById(R.id.delete);
-        EditText titleEditText = bottomSheet.findViewById(R.id.editText);
+        ImageView imageDataImageView = bottomSheet.findViewById(R.id.imageView);
+
+        EditText titleEditText = bottomSheet.findViewById(R.id.titleeditview);
+        EditText imageUrlEditText = bottomSheet.findViewById(R.id.editText);
 
         if (sampleDataDetails != null) {
             deleteImageView.setVisibility(View.VISIBLE);
             titleEditText.setText(sampleDataDetails.title);
+            imageDataImageView.setVisibility(View.VISIBLE);
+            displayImageWithGLide(imageDataImageView,sampleDataDetails.imageUrl);
+            imageUrlEditText.setText(sampleDataDetails.imageUrl);
         }
         deleteImageView.setOnClickListener(view -> {
             customAdapter.getItemList().remove(sampleDataDetails);
@@ -138,27 +140,36 @@ public class MainActivity extends AppCompatActivity {
             String titleValue = titleEditText.getText().toString();
             if (titleValue.isEmpty()) {
                 Toast.makeText(MainActivity.this, "Title cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (imageUrlEditText.getText().toString().isEmpty()) {
+                Toast.makeText(MainActivity.this, "Title cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            } else {
                 List<SampleDataDetails> sampleDataDetailsList = customAdapter.getItemList();
                 if (sampleDataDetails != null) {
 
                     int index = sampleDataDetailsList.indexOf(sampleDataDetails);
 
                     sampleDataDetails.title = titleValue;
+                    sampleDataDetails.imageUrl = imageUrlEditText.getText().toString();
                     sampleDataDetailsList.remove(index);
                     sampleDataDetailsList.add(index, sampleDataDetails);
 
                 } else {
-                    sampleDataDetailsList.add(0, new SampleDataDetails(titleValue, "https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
+                    sampleDataDetailsList.add(0, new SampleDataDetails(titleValue, imageUrlEditText.getText().toString()));
                 }
                 dataItemRecyclerView.getRecycledViewPool().clear();
                 customAdapter.setItemList(sampleDataDetailsList);
                 customAdapter.notifyDataSetChanged();
                 bottomSheet.cancel();
-            }
+
         });
         bottomSheet.show();
     }
-
+void displayImageWithGLide(ImageView imageView,String imageUrl)
+{
+    Glide.with(MainActivity.this).load(imageUrl).placeholder(R.drawable.no_photo).into(imageView);
+}
 }
