@@ -57,6 +57,8 @@ public class MainActivity extends AppCompatActivity {
                 TextView titleTextView = itemViewHolder.itemView.findViewById(R.id.textView);
                 displayImageWithGLide(imageView,dataItem.imageUrl);
                 titleTextView.setText(dataItem.title);
+
+
             }
 
             @Override
