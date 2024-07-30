@@ -1,5 +1,6 @@
 package com.example.customgridview;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,12 +12,12 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.customgridview.model.SampleDataDetails;
-import com.example.customgridview.model.SampleDataManger;
 import com.example.customgridviewlibrary.CustomAdapter;
 import com.example.customgridviewlibrary.ItemViewHolder;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -27,18 +28,20 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
-    SampleDataManger sampleDataManger = new SampleDataManger();
-    RecyclerView recyclerView;
+
+    RecyclerView dataItemRecyclerView;
     private static final String TAG = "MainActivit12y";
     int index = 0;
     CustomAdapter<SampleDataDetails> customAdapter;
-FloatingActionButton addItemFAB;
+    FloatingActionButton addItemFAB;
+    MainActivityViewModel mainActivityViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         initViews();
-        ArrayList<SampleDataDetails> sampleDataDetails = sampleDataManger.retrieveInitialData();
+        ArrayList<SampleDataDetails> sampleDataDetails = mainActivityViewModel.retrieveInitialData();
         addItemFAB.setOnClickListener(view -> displayItemDetails(null));
         customAdapter = new CustomAdapter<SampleDataDetails>(this, sampleDataDetails) {
 
@@ -60,17 +63,12 @@ FloatingActionButton addItemFAB;
                 super.onItemClick(dataItem);
                 Log.e(TAG, "onItemClick: asdasd");
                 displayItemDetails(dataItem);
-//                List<SampleDataDetails> sampleDataDetails = customAdapter.getItemList();
-//                sampleDataDetails.remove(2);
-//                sampleDataDetails.add(2, new SampleDataDetails("asd", "https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
-//                recyclerView.getRecycledViewPool().clear();
-//                customAdapter.setItemList(sampleDataDetails);
-//                customAdapter.notifyDataSetChanged();
+
             }
         };
-        recyclerView.setAdapter(customAdapter);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 2));
-        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+        dataItemRecyclerView.setAdapter(customAdapter);
+        dataItemRecyclerView.setLayoutManager(new GridLayoutManager(this, 2));
+        dataItemRecyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
                 super.onScrollStateChanged(recyclerView, newState);
@@ -86,7 +84,7 @@ FloatingActionButton addItemFAB;
                         if (index > 10)
                             return;
                         index = index + 4;
-                        ArrayList<SampleDataDetails> sampleDataDetails = sampleDataManger.retrieveMoreData(index);
+                        ArrayList<SampleDataDetails> sampleDataDetails = mainActivityViewModel.retrieveMoreData(index);
                         recyclerView.getRecycledViewPool().clear();
                         customAdapter.setItemList(sampleDataDetails);
                         customAdapter.notifyItemChanged(sampleDataDetails.size() - 1);
@@ -100,12 +98,18 @@ FloatingActionButton addItemFAB;
         });
     }
 
+    /**
+     * initiates views to variables
+     */
     private void initViews() {
 
-        recyclerView = findViewById(R.id.recyclerview);
+        dataItemRecyclerView = findViewById(R.id.recyclerview);
         addItemFAB = findViewById(R.id.additem);
+        mainActivityViewModel = new ViewModelProvider(this).get(MainActivityViewModel.class);
+
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     void displayItemDetails(@Nullable SampleDataDetails sampleDataDetails) {
         BottomSheetDialog bottomSheet =
                 new BottomSheetDialog(this);
@@ -126,7 +130,7 @@ FloatingActionButton addItemFAB;
         }
         deleteImageView.setOnClickListener(view -> {
             customAdapter.getItemList().remove(sampleDataDetails);
-            recyclerView.getRecycledViewPool().clear();
+            dataItemRecyclerView.getRecycledViewPool().clear();
             customAdapter.notifyDataSetChanged();
             bottomSheet.cancel();
         });
@@ -145,12 +149,10 @@ FloatingActionButton addItemFAB;
                     sampleDataDetailsList.remove(index);
                     sampleDataDetailsList.add(index, sampleDataDetails);
 
+                } else {
+                    sampleDataDetailsList.add(0, new SampleDataDetails(titleValue, "https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
                 }
-                else
-                {
-                    sampleDataDetailsList.add(0, new SampleDataDetails(titleValue,"https://static.remove.bg/sample-gallery/graphics/bird-thumbnail.jpg"));
-                }
-                recyclerView.getRecycledViewPool().clear();
+                dataItemRecyclerView.getRecycledViewPool().clear();
                 customAdapter.setItemList(sampleDataDetailsList);
                 customAdapter.notifyDataSetChanged();
                 bottomSheet.cancel();

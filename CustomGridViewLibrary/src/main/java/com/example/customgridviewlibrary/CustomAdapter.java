@@ -11,6 +11,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * custom adapter to display items in recyclerview
+ * uses generics to avoid making multiple adapters for different data
+ * data is set in the calling activity with the help of AdapterConfiguration {@link AdapterConfiguration#onDataBind(Object, int, ItemViewHolder)}  }
+ * layout resource is specified using {@link AdapterConfiguration#getLayoutResourceID()}  }
+ * @param <T>
+ */
 public abstract class CustomAdapter<T> extends RecyclerView.Adapter<ItemViewHolder> implements AdapterConfiguration<T> {
 
     Context context;
